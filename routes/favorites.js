@@ -9,7 +9,7 @@ const router = express.Router();
 //all favorites (characters and comics)
 router.get("/favorites", async (req, res) => {
   try {
-    const { email, id } = req.query;
+    const { id } = req.query;
     const favorites = await Favorite.find({ user: id }).populate({
       path: "user",
       select: "_id username email",
