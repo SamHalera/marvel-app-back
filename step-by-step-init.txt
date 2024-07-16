@@ -1,0 +1,53 @@
+STEP BY STEP FOR SERVER CRUD SERVICE
+
+1) Creation dossier 
+2) `npm init -y` dans le pwd
+3) `npm install express``
+4) `npm install mongoose``
+
+5) On index.js =>
+==> 
+````
+const express = require("express");
+
+const mongoose = require("mongoose"); // for creation of DB and CRUD
+
+//server
+const app = express();
+const port = 3000;
+app.use(express.json());
+
+
+app.all("*", (req, res) => {
+  res.status(404).json({ message: "Page not found" });
+});
+
+app.listen(port, () => console.log("Server has started!"));
+
+````
+
+6) DB CREATE
+`````
+// Je me connecte au serveur de BDD, qui tourne sur le localhost 27017, je me connecte à la BDD nommée Garage. Si elle n'existe pas, je la crée
+mongoose.connect("mongodb://localhost:27017/Garage");
+
+`````
+7) Define a model for collection 
+==>
+`````
+// Je déclare un modèle mongoose nommé Car => Cela va créer une collection nommée "Car" dans ma BDD, tous les documents qui seront créés dans cette collection devront restpecter la structure que j'ai écrite dans l'objet :
+const Car = mongoose.model("Car", {
+  // Une clef brand de type String
+  brand: {
+    type: String,
+    //  required signifie qu'on ne pourra pas créer un document sans clef brand
+    required: true,
+  },
+  //   Une clef color de type String
+  color: String,
+  //   Une clef year de type Number
+  year: Number,
+  //   Une clef isFrench de type Boolean
+  isFrench: Boolean,
+});
+`````
