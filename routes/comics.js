@@ -4,18 +4,14 @@ const Favorite = require("../models/Favorite");
 const isAuthenticated = require("../middlewares/IsAuthenticated");
 const router = express.Router();
 
-router.get("/comics", async (req, res) => {
+router.post("/comics", isAuthenticated, async (req, res) => {
   console.log("INSIDE COMICS");
   try {
     //PARAMS ACCEPTED AND OPTIONAL:
     //limit => between 1 and 100
     //skip => number of results to ignore
     //title => search a character by title
-    const { title, limit, skip, email } = req.query;
-
-    console.log("title=>", title);
-    console.log("limit=>", limit);
-    console.log("skip=>", skip);
+    const { title, limit, skip, token } = req.body;
 
     let query = "";
 
@@ -33,23 +29,20 @@ router.get("/comics", async (req, res) => {
       }
       if (skip) {
         let skipForQuery = skip * limitForQuery - limitForQuery;
-        console.log(skipForQuery);
+
         query += `&skip=${skipForQuery}`;
       }
-
-      console.log("limit typeof: ", typeof skip);
     }
 
-    console.log(query);
     const response = await axios.get(
       `https://lereacteur-marvel-api.herokuapp.com/comics?apiKey=${process.env.API_KEY}${query}`
     );
-    // console.log(response.data);
 
-    if (email) {
+    if (token) {
+      const user = req.user;
       const favorites = await Favorite.find().populate({
         path: "user",
-        select: "_id username email",
+        select: "_id username token",
       });
 
       const comics = response.data.results;
@@ -57,7 +50,7 @@ router.get("/comics", async (req, res) => {
       for (let i = 0; i < favorites.length; i++) {
         for (let j = 0; j < comics.length; j++) {
           if (favorites[i].itemId === comics[j]._id) {
-            if (favorites[i].user.email === email) {
+            if (favorites[i].user.token === token) {
               comics[j]["isFavorite"] = true;
             } else {
               comics[j]["isFavorite"] = false;
@@ -65,7 +58,6 @@ router.get("/comics", async (req, res) => {
           }
         }
       }
-      console.log(favorites);
     }
 
     res.status(200).json(response.data);
@@ -76,64 +68,60 @@ router.get("/comics", async (req, res) => {
 
 //GET COMICS BY CHARACTHER ID
 //Page of one character with the comics in relation to him
-router.get("/comics/:characterId", async (req, res) => {
+router.post("/comics/:characterId", isAuthenticated, async (req, res) => {
   try {
     const characterId = req.params.characterId;
-    console.log(characterId);
 
-    const { userId } = req.query;
+    const user = req.user;
+
     const response = await axios.get(
       `https://lereacteur-marvel-api.herokuapp.com/comics/${characterId}?apiKey=${process.env.API_KEY}`
     );
 
-    console.log(userId);
     const character = response.data;
-    if (userId) {
+    if (user) {
       const favorite = await Favorite.findOne({
-        user: userId,
+        user: user._id,
         itemId: characterId,
       }).populate({
         path: "user",
         select: "_id username email",
       });
 
-      console.log("favorite===>", favorite);
       if (favorite) {
         character["isFavorite"] = true;
       }
     }
 
-    console.log("charcter==>", character);
     res.status(200).json(character);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-router.get("/comic/:comicId", async (req, res) => {
+router.post("/comic", isAuthenticated, async (req, res) => {
   try {
-    const comicId = req.params.comicId;
-    console.log(comicId);
-    const { userId } = req.query;
+    // const comicId = req.params.comicId;
+    const { id } = req.body;
+
+    const user = req.user;
     const response = await axios.get(
-      `https://lereacteur-marvel-api.herokuapp.com/comic/${comicId}?apiKey=${process.env.API_KEY}`
+      `https://lereacteur-marvel-api.herokuapp.com/comic/${id}?apiKey=${process.env.API_KEY}`
     );
     const comic = response.data;
-    // if (userId) {
-    //   const favorite = await Favorite.findOne({
-    //     user: userId,
-    //     itemId: comicId,
-    //   }).populate({
-    //     path: "user",
-    //     select: "_id username email",
-    //   });
+    if (user) {
+      const favorite = await Favorite.findOne({
+        user: user._id,
+        itemId: id,
+      }).populate({
+        path: "user",
+        select: "_id username email",
+      });
 
-    //   console.log("favorite===>", favorite);
-    //   if (favorite) {
-    //     comic["isFavorite"] = true;
-    //   }
-    // }
+      if (favorite) {
+        comic["isFavorite"] = true;
+      }
+    }
 
-    console.log("comic==>", comic);
     res.status(200).json(comic);
   } catch (error) {
     res.status(500).json({ message: error.message });

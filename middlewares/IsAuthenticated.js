@@ -6,6 +6,7 @@ const isAuthenticated = async (req, res, next) => {
   if (req.headers.authorization) {
     const tokenFromHeaders = req.headers.authorization.replace("Bearer ", "");
 
+    console.log("token", tokenFromHeaders);
     //je verifie si le token existe bien en base
     // ==> avec select on demande à mongoose de ne selectionner que les clé id et account pour l'objet user que j'envoie à req.user
     // pour des raisons de sécurité, on décide de ne pase faire balader des infos confidentielle de l'utilisateur (salt hash token)
