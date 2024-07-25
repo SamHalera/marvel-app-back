@@ -1,7 +1,11 @@
-// const { default: mongoose } = require("mongoose");
-const User = require("../models/User");
-
-const isAuthenticated = async (req, res, next) => {
+import { User } from "../models/User";
+import { NextFunction, Request, Response } from "express";
+import { RequestExtended } from "../types/express/types/express";
+export const isAuthenticated = async (
+  req: RequestExtended,
+  res: Response,
+  next: NextFunction
+) => {
   //Je recupère le token dans le header de la requete
   if (req.headers.authorization) {
     const tokenFromHeaders = req.headers.authorization.replace("Bearer ", "");
@@ -19,14 +23,11 @@ const isAuthenticated = async (req, res, next) => {
     } else {
       //SI je trouve le user je crée une clé user dans la requete et j'envoie tout à la function suivante
       req.user = user;
+
       return next();
     }
   } else {
     //si la requete n'envoi pas de headers avec un token
     return res.status(401).json({ message: "Unauthorized!" });
   }
-
-  //Je vérifie si dans ma collection User, il existe un user avec la valeur du token envoyé via le headers
 };
-
-module.exports = isAuthenticated;

@@ -1,0 +1,42 @@
+mkdir my-express-api
+cd my-express-api
+npm init -y
+install express typescript ts-node @types/node @types/express --save-dev
+
+touch tsconfig.json
+--> 
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
+npm i dotenv
+`npm install express`
+`npm install mongoose`
+npm install nodemon --save-dev
+npm i cors
+
+
+inside package.json
+--> 
+"scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  }
+
+npm i body-parser --save
+npm i uid2
+npm i --save-dev @types/uid2
+npm i crypto-js
+npm i --save-dev @types/crypto-js
+
