@@ -51,3 +51,6 @@ const Car = mongoose.model("Car", {
   isFrench: Boolean,
 });
 `````
+
+
+npx nodemon server.js
