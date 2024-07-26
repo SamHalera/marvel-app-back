@@ -6,60 +6,62 @@ import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 export const router = express.Router();
 
-// //all favorites (characters and comics)
-// router.get("/favorites", async (req, res) => {
-//     try {
-//       const { id } = req.query;
-//       const favorites = await Favorite.find({ user: id }).populate({
-//         path: "user",
-//         select: "_id username email",
-//       });
+//all favorites (characters and comics)
+router.get(
+  "/favorites",
+  isAuthenticated,
+  async (req: RequestExtended, res: Response) => {
+    try {
+      const favorites = await Favorite.find({ user: req.user._id }).populate({
+        path: "user",
+        select: "_id username email",
+      });
 
-//       console.log("id===>", id);
-//       console.log("favorite=>", favorites);
+      const responseComics = await fetch(
+        `https://lereacteur-marvel-api.herokuapp.com/comics?apiKey=${process.env.API_KEY}`
+      );
 
-//       const responseComics = await axios.get(
-//         `https://lereacteur-marvel-api.herokuapp.com/comics?apiKey=${process.env.API_KEY}`
-//       );
+      const responseCharacters = await fetch(
+        `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.API_KEY}`
+      );
 
-//       const responseCharacters = await axios.get(
-//         `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.API_KEY}`
-//       );
+      const dataComics = await responseComics.json();
+      const dataCharacters = await responseCharacters.json();
+      const comics = dataComics.results;
+      const characters = dataCharacters.results;
 
-//       const comics = responseComics.data.results;
-//       const characters = responseCharacters.data.results;
+      const arrayOfFavorites = [];
 
-//       const arrayOfFavorites = [];
+      for (let i = 0; i < favorites.length; i++) {
+        for (let j = 0; j < characters.length; j++) {
+          if (favorites[i].itemId === characters[j]._id) {
+            if (favorites[i].user.email === req.user.email) {
+              characters[j]["label"] = "character";
+              characters[j]["user"] = favorites[i].user.email;
+              arrayOfFavorites.push(characters[j]);
+            }
+          }
+        }
+      }
 
-//       for (let i = 0; i < favorites.length; i++) {
-//         for (let j = 0; j < characters.length; j++) {
-//           if (favorites[i].itemId === characters[j]._id) {
-//             if (favorites[i].user.email === email) {
-//               characters[j]["label"] = "character";
-//               characters[j]["user"] = favorites[i].user._id;
-//               arrayOfFavorites.push(characters[j]);
-//             }
-//           }
-//         }
-//       }
+      for (let i = 0; i < favorites.length; i++) {
+        for (let j = 0; j < comics.length; j++) {
+          if (favorites[i].itemId === comics[j]._id) {
+            if (favorites[i].user.email === req.user.email) {
+              comics[j]["label"] = "comic";
+              comics[j]["user"] = favorites[i].user.email;
+              arrayOfFavorites.push(comics[j]);
+            }
+          }
+        }
+      }
 
-//       for (let i = 0; i < favorites.length; i++) {
-//         for (let j = 0; j < comics.length; j++) {
-//           if (favorites[i].itemId === comics[j]._id) {
-//             if (favorites[i].user.email === email) {
-//               comics[j]["label"] = "comic";
-//               comics[j]["user"] = favorites[i].user._id;
-//               arrayOfFavorites.push(comics[j]);
-//             }
-//           }
-//         }
-//       }
-//       console.log("arrayOfFavorites==>", arrayOfFavorites);
-//       res.status(200).json(arrayOfFavorites);
-//     } catch (error) {
-//       res.status(500).json({ message: error.message });
-//     }
-//   });
+      res.status(200).json(arrayOfFavorites);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 //persiste a favorite (character or comics) in db
 router.post(
@@ -69,7 +71,6 @@ router.post(
     try {
       const { itemId, label } = req.body;
 
-      // console.log("body req user", req.user);
       //Verify if item (character or comics) is already favorite, not do anything but return the item
       const favoriteExist = await Favorite.findOne({ itemId: itemId });
       if (favoriteExist && favoriteExist.user === req.user._id) {

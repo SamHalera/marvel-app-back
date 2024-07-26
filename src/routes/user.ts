@@ -110,7 +110,7 @@ router.get(
   async (req: RequestExtended, res: Response) => {
     try {
       const user = await User.findById({ _id: req.user._id }).select(
-        "username email avatar"
+        "username email avatar -_id"
       );
 
       return res.status(200).json(user);
@@ -219,7 +219,7 @@ router.post(
           });
         }
       }
-      console.log("user", user);
+
       await user.save();
       //   }
 
