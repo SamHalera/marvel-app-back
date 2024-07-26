@@ -1,3 +1,4 @@
+const cloudinary = require("cloudinary").v2;
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import express, { Express, Request, Response } from "express";
@@ -11,10 +12,17 @@ import { router as favoriteRouter } from "./routes/favorites";
 import { router as userRouter } from "./routes/user";
 dotenv.config();
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
 const app: Express = express();
 
 // app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(characterRouter);
@@ -28,11 +36,9 @@ mongoose.connect(process.env.MONGODB_URI ?? "");
 
 //HOME PAGE we get comics and characters limit to 20 itemz each
 app.get("/", async (req, res) => {
-  console.log("hello");
   try {
     const { limit } = req.query;
 
-    console.log("limit===>", limit);
     const query = `&limit=${limit}`;
 
     const responseCharacters = await fetch(
