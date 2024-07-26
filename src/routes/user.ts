@@ -1,13 +1,15 @@
+const cloudinary = require("cloudinary").v2;
 import express, { Request, Response } from "express";
 
 import { User } from "../models/User";
 import uid2 from "uid2";
 import SHA256 from "crypto-js/sha256";
 import encBase64 from "crypto-js/enc-base64";
-
-import { RequestExtended } from "../types/express/types/express";
+import fileUpload from "express-fileupload";
+import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 import { error } from "console";
+import { convertToBase64 } from "../utils/convertToBase64";
 export const router = express.Router();
 
 //Sign Up creat new User
@@ -117,15 +119,33 @@ router.get(
     }
   }
 );
+//GET USER FROM ID
+router.get(
+  "/user/avatar",
+  isAuthenticated,
+  async (req: RequestExtended, res: Response) => {
+    try {
+      const user = await User.findById({ _id: req.user._id }).select(
+        "avatar -_id"
+      );
+
+      return res.status(200).json(user);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 //UPDATE USER INFOS (picture, username, password)
 // router.put("/profile", isAuthenticated, fileUpload(), async (req, res) => {
 router.post(
   "/user/profile",
   isAuthenticated,
+  fileUpload(),
   async (req: RequestExtended, res: Response) => {
-    const { username, password, newPassword } = req.body;
+    const { username, password, newPassword, picture } = req.body;
 
+    console.log("body==>", req.body);
     try {
       console.log("put profile", req.user);
 
@@ -163,48 +183,51 @@ router.post(
         }
       }
 
-      // if (req.files) {
-      //   let userFolderPath;
-      //   let previousPublicId;
+      if (req.files) {
+        console.log("file ici");
+        let userFolderPath;
+        let previousPublicId;
 
-      //   if (!user.avatar) {
-      //     //create folder for marvel project > users
-      //     const userFolder = await cloudinary.api.create_folder(
-      //       `/marvel/users/${user._id}`
-      //     );
-      //     userFolderPath = userFolder.path;
-      //   } else {
-      //     const userFolder = `/marvel/users/${user._id}`;
-      //     userFolderPath = userFolder;
-      //     //if user has already a picture we keep its public_id in order to delete it after uploading the new one
-      //     previousPublicId = user.avatar.public_id;
-      //   }
+        if (!user.avatar) {
+          //create folder for marvel project > users
+          const userFolder = await cloudinary.api.create_folder(
+            `/marvel/users/${user._id}`
+          );
+          userFolderPath = userFolder.path;
+        } else {
+          const userFolder = `/marvel/users/${user._id}`;
+          userFolderPath = userFolder;
+          //if user has already a picture we keep its public_id in order to delete it after uploading the new one
+          previousPublicId = user.avatar.public_id;
+        }
 
-      //   //Tranformation de l'image en string avant save sur cloudinary
-      //   const pictureToUpload = req.files.picture;
-      //   const transformedPicture = convertToBase64(pictureToUpload);
+        const pictureToUpload = req.files.picture;
+        const transformedPicture = convertToBase64(pictureToUpload);
 
-      //   const pictureToSave = await cloudinary.uploader.upload(
-      //     transformedPicture,
-      //     { folder: userFolderPath }
-      //   );
+        const pictureToSave = await cloudinary.uploader.upload(
+          transformedPicture,
+          { folder: userFolderPath }
+        );
 
-      //   //new picture replaced the previous for user object
-      //   user.avatar = pictureToSave;
+        //new picture replaced the previous for user object
+        user.avatar = pictureToSave;
 
-      //   //New picture is uploaded with success in CLoudinary. We can delete the old one
-      //   if (previousPublicId) {
-      //     await cloudinary.uploader.destroy(previousPublicId, {
-      //       folder: userFolderPath,
-      //     });
-      //   }
-      // }
+        //New picture is uploaded with success in CLoudinary. We can delete the old one
+        if (previousPublicId) {
+          await cloudinary.uploader.destroy(previousPublicId, {
+            folder: userFolderPath,
+          });
+        }
+      }
       console.log("user", user);
       await user.save();
       //   }
-      const { _id, hash, salt, token, ...partialUser } = user;
-      console.log(partialUser);
-      return res.status(200).json(partialUser);
+
+      return res.status(200).json({
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar,
+      });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

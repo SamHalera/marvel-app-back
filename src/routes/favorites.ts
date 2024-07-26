@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 
 import { Favorite } from "../models/Favorites";
 
-import { RequestExtended } from "../types/express/types/express";
+import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 export const router = express.Router();
 
@@ -69,7 +69,6 @@ router.post(
     try {
       const { itemId, label } = req.body;
 
-      console.log("itemId", itemId);
       // console.log("body req user", req.user);
       //Verify if item (character or comics) is already favorite, not do anything but return the item
       const favoriteExist = await Favorite.findOne({ itemId: itemId });
@@ -96,8 +95,7 @@ router.post(
 router.delete("/favorites/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("ici delete");
-    console.log("id to delete==>", id);
+
     const favorite = await Favorite.findOne({ itemId: id });
     //si pas de favorite ==> envoi d'erreur
     if (!favorite) {
@@ -107,7 +105,6 @@ router.delete("/favorites/:id", async (req, res) => {
 
     await Favorite.deleteOne({ itemId: id });
 
-    console.log("favorite=>>", favorite);
     res.status(201).json(favorite);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

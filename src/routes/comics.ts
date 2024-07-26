@@ -2,7 +2,7 @@ import express, { Response } from "express";
 
 import { Favorite } from "../models/Favorites";
 
-import { RequestExtended } from "../types/express/types/express";
+import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 export const router = express.Router();
 
@@ -11,7 +11,6 @@ router.post(
 
   isAuthenticated,
   async (req: RequestExtended, res: Response) => {
-    console.log("INSIDE COMICS");
     try {
       //PARAMS ACCEPTED AND OPTIONAL:
       //limit => between 1 and 100

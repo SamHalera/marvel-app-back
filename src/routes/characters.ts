@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 
 import { Favorite } from "../models/Favorites";
 
-import { RequestExtended } from "../types/express/types/express";
+import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 export const router = express.Router();
 

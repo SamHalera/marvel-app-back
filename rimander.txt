@@ -40,3 +40,7 @@ npm i --save-dev @types/uid2
 npm i crypto-js
 npm i --save-dev @types/crypto-js
 
+npm i cloudinary
+
+npm i express-fileupload
+npm install --save @types/express-fileupload
