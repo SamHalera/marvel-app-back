@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
+import { CloudinaryFile } from "../types/types";
 
 export interface UserInterface {
   email: string;
@@ -7,7 +8,7 @@ export interface UserInterface {
   token: string;
   hash: string;
   salt: String;
-  // avatar: Object,
+  avatar?: CloudinaryFile;
 }
 
 const userSchema = new Schema<UserInterface>({
@@ -16,5 +17,6 @@ const userSchema = new Schema<UserInterface>({
   token: { type: String, required: true },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
+  avatar: { type: Object, required: false },
 });
 export const User = mongoose.model("User", userSchema);
