@@ -84,7 +84,7 @@ router.post(
         });
 
         await favorite.save();
-        // console.log("favorite here=>", favorite);
+
         res.status(201).json(favorite);
       }
     } catch (error: any) {
@@ -100,7 +100,6 @@ router.delete("/favorites/:id", async (req, res) => {
     const favorite = await Favorite.findOne({ itemId: id });
     //si pas de favorite ==> envoi d'erreur
     if (!favorite) {
-      console.log("ici");
       return res.status(400).json({ error: "favorite doesn't exist!" });
     }
 

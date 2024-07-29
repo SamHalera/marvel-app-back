@@ -20,9 +20,6 @@ router.post(
 
       let query = "";
 
-      //   console.log("title", title);
-      // const objForQuery = {};
-
       let limitForQuery = 100;
 
       if (title || skip) {
@@ -116,7 +113,7 @@ router.get(
   async (req: RequestExtended, res: Response) => {
     try {
       const { id } = req.params;
-      console.log(id);
+
       const user = req.user;
       const response = await fetch(
         `https://lereacteur-marvel-api.herokuapp.com/comic/${id}?apiKey=${process.env.API_KEY}`
