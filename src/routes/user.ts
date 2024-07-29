@@ -66,7 +66,6 @@ router.post("/user/signup", async (req: Request, res: Response) => {
 //LOGIN
 router.post("/user/login", async (req, res) => {
   try {
-    console.log("hello login");
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -75,7 +74,6 @@ router.post("/user/login", async (req, res) => {
       });
     }
 
-    console.log(email);
     const user = await User.findOne({ email: email });
 
     if (user === null) {
@@ -145,10 +143,7 @@ router.post(
   async (req: RequestExtended, res: Response) => {
     const { username, password, newPassword, picture } = req.body;
 
-    console.log("body==>", req.body);
     try {
-      console.log("put profile", req.user);
-
       const user = await User.findById({ _id: req.user._id });
 
       if (user === null) {
@@ -170,7 +165,6 @@ router.post(
         if (password && newPassword) {
           const newHash = SHA256(password + user.salt).toString(encBase64);
           if (newHash !== user.hash) {
-            console.log("bad request");
             return res
               .status(400)
               .json({ type: "error", message: "Invalid credentials" });
@@ -184,7 +178,6 @@ router.post(
       }
 
       if (req.files) {
-        console.log("file ici");
         let userFolderPath;
         let previousPublicId;
 
