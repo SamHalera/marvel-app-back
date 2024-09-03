@@ -1,7 +1,8 @@
+const express = require("express");
 const cloudinary = require("cloudinary").v2;
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import express, { Express, Request, Response } from "express";
+import { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 // const express = require("express");
 import cors from "cors";
