@@ -64,13 +64,11 @@ router.post("/user/reset-password", async (req: Request, res: Response) => {
     res.status(500).json({ message: error });
   }
 });
-//Sign Up creat new User
+
 router.post("/user/signup", async (req: Request, res: Response) => {
   try {
     const { email, password, username } = req.body;
 
-    //If username or email are not filler send an error message
-    //sanitize all data sent by user ==> package `dompurify` ?
     if (!email || !password || !username) {
       return res.status(400).json({ message: "All fields are required!" });
     }
