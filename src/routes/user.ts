@@ -1,4 +1,5 @@
 const cloudinary = require("cloudinary").v2;
+
 import express, { Request, Response } from "express";
 
 import { User } from "../models/User";
@@ -8,10 +9,61 @@ import encBase64 from "crypto-js/enc-base64";
 import fileUpload from "express-fileupload";
 import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
-import { error } from "console";
+
 import { convertToBase64 } from "../utils/convertToBase64";
+import { senMail } from "../utils/mailer";
+import { url } from "inspector";
+import { resetPasswordtemplate } from "../templates/emails/reset-pass";
+import mongoose from "mongoose";
+
 export const router = express.Router();
 
+router.post("/user/forgotten-password", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthotized!" });
+    }
+    if (user) {
+      const from: string = "noreply@marvelous.com";
+      const subject: string = "Password forgotten";
+      // Render email template
+      const url = process.env.FRONT_URL;
+      const token = user.token;
+      const html = resetPasswordtemplate(token);
+      const mailTemplate: string = `Hello Vous avez oublié votre mot de passe  ? ${email}`;
+
+      senMail(from, email, subject, html);
+    }
+    return res.status(201).json({ message: "TEST FORGOTTEN PASS" });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
+
+router.post("/user/reset-password", async (req: Request, res: Response) => {
+  try {
+    const { password, token } = req.body;
+    if (!password) {
+      return res.status(400).json({ message: "This fiel is required!" });
+    }
+    const user = await User.findOne({ token: token });
+    if (!user) {
+      return res.status(401).json({ message: "UnAthourized" });
+    }
+    const salt = uid2(16);
+
+    const hash = SHA256(password + salt).toString(encBase64);
+
+    user.salt = salt;
+    user.hash = hash;
+    await user.save();
+    res.status(200).json({ success: "Reset successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
 //Sign Up creat new User
 router.post("/user/signup", async (req: Request, res: Response) => {
   try {

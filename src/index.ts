@@ -6,6 +6,8 @@ import { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 // const express = require("express");
 import cors from "cors";
+const exphbs = require("express-handlebars");
+const path = require("path");
 
 import { router as characterRouter } from "./routes/characters";
 import { router as comicRouter } from "./routes/comics";
@@ -22,6 +24,12 @@ cloudinary.config({
 
 const app: Express = express();
 
+// Configure Express Handlebars
+// app.engine("handlebars", exphbs());
+// app.set("view engine", "handlebars");
+
+// Set views directory
+// app.set("views", path.join(__dirname, "templates", "emails"));
 // app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
