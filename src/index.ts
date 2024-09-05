@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
-// const express = require("express");
+
 import cors from "cors";
 
 import { router as characterRouter } from "./routes/characters";
@@ -22,7 +22,6 @@ cloudinary.config({
 
 const app: Express = express();
 
-// app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
