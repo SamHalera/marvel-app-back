@@ -25,18 +25,18 @@ router.post("/user/forgotten-password", async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({ message: "Unauthotized!" });
     }
-    if (user) {
-      const from: string = "noreply@marvelous.com";
-      const subject: string = "Password forgotten";
-      // Render email template
-      const url = process.env.FRONT_URL;
-      const token = user.token;
-      const html = resetPasswordtemplate(token);
-      const mailTemplate: string = `Hello Vous avez oublié votre mot de passe  ? ${email}`;
 
-      senMail(from, email, subject, html);
-    }
-    return res.status(201).json({ message: "TEST FORGOTTEN PASS" });
+    const from: string = "noreply@marvelous.com";
+    const subject: string = "Password forgotten";
+    // Render email template
+    const url = process.env.FRONT_URL;
+    const token = user.token;
+    const html = resetPasswordtemplate(token);
+    const mailTemplate: string = `Hello Vous avez oublié votre mot de passe  ? ${email}`;
+
+    senMail(from, email, subject, html);
+
+    return res.status(201).json({ success: "Email has been sent" });
   } catch (error) {
     res.status(500).json({ message: error });
   }
