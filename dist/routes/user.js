@@ -22,8 +22,7 @@ const enc_base64_1 = __importDefault(require("crypto-js/enc-base64"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
 const isAuthenticated_1 = require("../middelware/isAuthenticated");
 const convertToBase64_1 = require("../utils/convertToBase64");
-const mailer_1 = require("../utils/mailer");
-const reset_pass_1 = require("../templates/emails/reset-pass");
+const brevoApi_1 = require("../libs/brevoApi");
 exports.router = express_1.default.Router();
 exports.router.post("/user/forgotten-password", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -32,14 +31,20 @@ exports.router.post("/user/forgotten-password", (req, res) => __awaiter(void 0, 
         if (!user) {
             return res.status(401).json({ message: "Unauthotized!" });
         }
-        const from = "noreply@marvelous.com";
-        const subject = "Password forgotten";
-        // Render email template
-        const url = process.env.FRONT_URL;
-        const token = user.token;
-        const html = (0, reset_pass_1.resetPasswordtemplate)(token);
-        const mailTemplate = `Hello Vous avez oublié votre mot de passe  ? ${email}`;
-        (0, mailer_1.senMail)(from, email, subject, html);
+        if (!process.env.FRONT_URL) {
+            return res.status(401).json({ error: "FRONT URL IS MISSING!" });
+        }
+        const emailTemplateId = 1;
+        const paramsForBrevo = {
+            url: process.env.FRONT_URL,
+            token: user.token,
+        };
+        const to = [
+            {
+                email,
+            },
+        ];
+        yield (0, brevoApi_1.brevoSendEmail)(paramsForBrevo, to, emailTemplateId);
         return res.status(201).json({ success: "Email has been sent" });
     }
     catch (error) {

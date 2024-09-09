@@ -11,10 +11,9 @@ import { RequestExtended } from "../types/types";
 import { isAuthenticated } from "../middelware/isAuthenticated";
 
 import { convertToBase64 } from "../utils/convertToBase64";
-import { senMail } from "../utils/mailer";
-import { url } from "inspector";
-import { resetPasswordtemplate } from "../templates/emails/reset-pass";
+
 import mongoose from "mongoose";
+import { brevoSendEmail } from "../libs/brevoApi";
 
 export const router = express.Router();
 
@@ -26,15 +25,22 @@ router.post("/user/forgotten-password", async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthotized!" });
     }
 
-    const from: string = "noreply@marvelous.com";
-    const subject: string = "Password forgotten";
-    // Render email template
-    const url = process.env.FRONT_URL;
-    const token = user.token;
-    const html = resetPasswordtemplate(token);
-    const mailTemplate: string = `Hello Vous avez oublié votre mot de passe  ? ${email}`;
+    if (!process.env.FRONT_URL) {
+      return res.status(401).json({ error: "FRONT URL IS MISSING!" });
+    }
 
-    senMail(from, email, subject, html);
+    const emailTemplateId = 1;
+    const paramsForBrevo = {
+      url: process.env.FRONT_URL,
+      token: user.token,
+    };
+    const to = [
+      {
+        email,
+      },
+    ];
+
+    await brevoSendEmail(paramsForBrevo, to, emailTemplateId);
 
     return res.status(201).json({ success: "Email has been sent" });
   } catch (error) {
